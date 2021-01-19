@@ -24,7 +24,7 @@ if (token) {
       if (queryContent.length > 5) {
         const generatedMessage = await GenMessage(queryContent);
 
-        console.log(generatedMessage);
+        results.push(...generatedMessage);
       } else {
         results.push({
           type: "Article",

@@ -4,15 +4,16 @@ import { InlineQueryResult } from "../types";
 
 const PImage = require("pureimage");
 const fs = require("fs");
+const webp = require("webp-converter");
 
-export default async (message: string) => {
+export default async (message: string): Promise<InlineQueryResult[]> => {
   let results: InlineQueryResult[] = [];
 
-  results.push(message);
+  webp.grant_permission();
 
-  PImage.decodePNGFromStream(
-    fs.createReadStream("./src/assets/balloons/Jaehee/03.png")
-  ).then((img: any) => {
+  const image_work = await PImage.decodePNGFromStream(
+    fs.createReadStream("./src/assets/balloons/Yoosung/04.png")
+  ).then(async (img: any) => {
     console.log("size is", img.width, img.height);
 
     var fnt = PImage.registerFont(
@@ -20,7 +21,7 @@ export default async (message: string) => {
       "Roboto"
     );
 
-    fnt.load(() => {
+    await fnt.load(() => {
       var ctx = img.getContext("2d");
       ctx.fillStyle = "#000";
       ctx.font = "348pt 'Roboto'";
@@ -40,16 +41,37 @@ export default async (message: string) => {
           img.width
         );
       }
-
-      PImage.encodePNGToStream(
-        img,
-        fs.createWriteStream("./another.png"),
-        50
-      ).then(() => {
-        console.log("done writing");
-      });
     });
+
+    const response = await PImage.encodePNGToStream(
+      img,
+      fs.createWriteStream("./another.png"),
+      50
+    ).then(() => {
+      console.log("done writing");
+
+      const result = webp.cwebp("./another.png", "./another.webp", "-q 80");
+
+      result.then(() => {
+        let result: InlineQueryResult = {
+          type: "document",
+          id: "Yoosung04" + message,
+          title: "Yoosung 04",
+          photo_url: "./another.webp",
+          mime_type: "application/pdf",
+        };
+
+        results.push(result);
+      });
+
+      return result;
+    });
+
+    console.log("response", response);
   });
+
+  console.log("image_work", image_work);
+  console.log("results", results);
 
   return results;
 };
