@@ -43,3 +43,11 @@ export type InputTextMessageContent = {
   parse_mode?: "HTML" | "MarkdownV2" | "Markdown";
   disable_web_page_preview?: boolean;
 };
+
+export type balloon = {
+  char_name: string;
+  name: string;
+  prefix: string;
+  startHeight: number;
+  address: string;
+};

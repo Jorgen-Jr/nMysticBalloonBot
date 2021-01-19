@@ -1,9 +1,11 @@
-import GenMessage from "./controllers/GenMessage";
+import genSticker from "./controllers/genSticker";
 import { InlineQueryResult, query } from "./types";
 
 import TelegramBot from "node-telegram-bot-api";
 
 const token = process.env.BOT_TOKEN;
+
+import { balloons } from "./data";
 
 let bot: TelegramBot | undefined = undefined;
 
@@ -22,9 +24,8 @@ if (token) {
       );
 
       if (queryContent.length > 5) {
-        const generatedMessage = await GenMessage(queryContent);
-
-        results.push(...generatedMessage);
+        // const generatedMessage = await genSticker(queryContent, "JA01");
+        // results.push(...generatedMessage);
       } else {
         results.push({
           type: "Article",
@@ -60,15 +61,50 @@ if (token) {
   // Listen for any kind of message.
   bot.on("message", async (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
+    const message = msg.text;
 
-    let results: InlineQueryResult[] = [];
+    switch (message) {
+      case "/start":
+        bot?.sendMessage(chatId, "Let's get started.");
+        break;
+      case "/instructions":
+        bot?.sendMessage(chatId, "Let's get started.");
+        bot?.sendMessage(chatId, "You have the following options:");
 
-    if (results.length === 0) {
-      // send a message in case it doesn't find anything.
-      bot?.sendMessage(
-        chatId,
-        "Sorry, coudn't catch that 😢 \nPlease use only inline commands for now."
-      );
+        let instructions = "";
+
+        balloons.forEach((ballon: { char_name: string; prefix: string }) => {
+          instructions += `For ${ballon.char_name} with the prefix ${ballon.prefix}  \n`;
+        });
+
+        instructions += `\nAnd your message should be preffix + message Eg. "JA01 Good morning"`;
+
+        bot?.sendMessage(chatId, instructions);
+        break;
+      default:
+        if (message) {
+          const result = await genSticker(
+            message.substring(5),
+            message.substring(0, 4)
+          );
+
+          console.log(result);
+
+          if (result !== null) {
+            bot?.sendSticker(
+              chatId,
+              `https://raw.githubusercontent.com/Jorgen-Jr/nMysticBalloonBot/main/src/assets/balloons/Jaehee/01.png?token=AJCCHQL4XXDRJAOKE3DVYI3AA5ULK`
+            );
+          } else {
+            bot?.sendMessage(chatId, "Prefix invalid :/");
+          }
+        } else {
+          bot?.sendMessage(
+            chatId,
+            "Sorry, coudn't catch that 😢 \nPlease use only inline commands for now."
+          );
+        }
+        break;
     }
   });
 }
