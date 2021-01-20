@@ -1,3 +1,4 @@
+import sleep from "../util/sleep";
 import { balloons } from "../data";
 import { balloon } from "../types";
 
@@ -9,26 +10,38 @@ const webp = require("webp-converter");
 
 export default async (message: string, prefix: string): Promise<any | null> => {
   console.log(prefix, message);
+
   webp.grant_permission();
 
   const image = balloons.find((balloon: balloon) => balloon.prefix === prefix);
+
+  //Disgusting
+  const image_name = `${prefix}${message
+    .split("\n")
+    .join("_")
+    .split(" ")
+    .join("_")}`;
+
   if (image) {
+    //Processing the image
     await PImage.decodePNGFromStream(fs.createReadStream(image?.address)).then(
       async (img: any) => {
         console.log("size is", img.width, img.height);
 
-        var fnt = PImage.registerFont(
-          "./src/assets/fonts/roboto-regular.ttf",
-          "Roboto"
-        );
+        console.log("Font Requested: ", image.font);
 
-        await fnt.load(() => {
-          var ctx = img.getContext("2d");
+        let fnt = PImage.registerFont(image.font.address, image.font.name);
+
+        let fonstSize = image.fontSize ? image.fontSize : "348pt";
+
+        fnt.load(async () => {
+          let ctx = img.getContext("2d");
           ctx.fillStyle = "#000";
-          ctx.font = "348pt 'Roboto'";
+          ctx.font = `${fonstSize} '${image.font.name}'`;
           ctx.textAlign = "center";
 
-          let lineHeight = 350;
+          console.log("lineheight", image.lineHeight);
+          let lineHeight = image.lineHeight ? image.lineHeight : 350;
           let lines = message.split("\n");
 
           let startHeight =
@@ -38,35 +51,63 @@ export default async (message: string, prefix: string): Promise<any | null> => {
             let line = lines[i];
             ctx.fillText(
               line,
-              img.width / 2,
-              startHeight + lineHeight * i,
+              img.width / 2 + image.startWidth,
+              startHeight + lineHeight * i + image.startHeight,
               img.width
             );
           }
-        });
 
-        await PImage.encodePNGToStream(
-          img,
-          fs.createWriteStream(`./temp/${prefix}${message}.png`),
-          50
-        ).then(() => {
-          console.log("done writing");
+          console.log("Done setting the text!");
 
-          const result = webp.cwebp(
-            `./temp/${prefix}${message}.png`,
-            `./generated/${prefix}${message}.webp`,
-            "-q 80"
-          );
-
-          result.then((res: any) => {
-            console.log(res);
-            return `./generated/${prefix}${message}.webp`;
+          PImage.encodePNGToStream(
+            img,
+            fs.createWriteStream(`./temp/${image_name}.png`),
+            50
+          ).then(() => {
+            console.log("done writing");
           });
-
-          return result;
         });
+
+        console.log("Font loaded?", fnt.loaded);
+        console.log("Waiting for generated image.");
+
+        await sleep(1000);
+
+        if (!fnt.loaded) {
+          console.log("Trying again 1");
+          await sleep(1000);
+        }
+        if (!fnt.loaded) {
+          console.log("Trying again 2");
+          await sleep(1000);
+        }
+        if (!fnt.loaded) {
+          console.log("Trying again 3");
+          await sleep(1000);
+        }
       }
     );
+
+    console.log("waiting for image to be ready");
+
+    await sleep(500);
+
+    //Converting the image
+    const result = webp.cwebp(
+      `./temp/${image_name}.png`,
+      `./generated/${image_name}.webp`,
+      "-q 80"
+    );
+
+    const generated_address = result
+      .then(() => {
+        return `./generated/${image_name}.webp`;
+      })
+      .catch(() => {
+        return null;
+      });
+
+    return generated_address;
   } else {
     return null;
   }

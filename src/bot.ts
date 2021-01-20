@@ -83,18 +83,20 @@ if (token) {
         break;
       default:
         if (message) {
-          const result = await genSticker(
-            message.substring(5),
-            message.substring(0, 4)
+          bot?.sendMessage(
+            chatId,
+            "Please wait while we process your request :)"
           );
 
-          console.log(result);
+          let prefix = message.substring(5);
+          let text = message.substring(0, 4);
+          const result = await genSticker(prefix, text);
 
+          console.log("Resultado da geração", result);
           if (result !== null) {
-            bot?.sendSticker(
-              chatId,
-              `https://raw.githubusercontent.com/Jorgen-Jr/nMysticBalloonBot/main/src/assets/balloons/Jaehee/01.png?token=AJCCHQL4XXDRJAOKE3DVYI3AA5ULK`
-            );
+            bot?.sendSticker(chatId, result, {
+              reply_to_message_id: msg.message_id,
+            });
           } else {
             bot?.sendMessage(chatId, "Prefix invalid :/");
           }

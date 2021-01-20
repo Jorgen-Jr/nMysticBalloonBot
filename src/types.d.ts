@@ -6,22 +6,6 @@ export type query = {
   offset?: string;
 };
 
-export type Definition = {
-  word: string;
-  definition: DefinitionObject;
-  source: string;
-  synonyms?: string[];
-  examples?: string[];
-  antonyms?: string[];
-};
-
-export type DefinitionObject = {
-  index?: number;
-  category?: string;
-  definition?: string | { definition: string; index: number }[];
-  definitions?: { definition: string; index: string }[];
-};
-
 export type InlineQueryResult = TelegramBot.InlineQueryResult;
 
 export type InlineQueryResultArticle = {
@@ -49,5 +33,14 @@ export type balloon = {
   name: string;
   prefix: string;
   startHeight: number;
+  startWidth: number;
+  address: string;
+  fontSize?: string;
+  lineHeight?: number;
+  font: font;
+};
+
+export type font = {
+  name: string;
   address: string;
 };
