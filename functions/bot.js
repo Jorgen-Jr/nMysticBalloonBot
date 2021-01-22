@@ -185,7 +185,7 @@ exports.handler = async event => {
                             parse_mode,
                         }
 
-                        const res = await sendMessage(response);
+                        await sendMessage(response);
 
                         let prefix = message.substring(5);
                         let text = message.substring(0, 4);
@@ -218,8 +218,7 @@ exports.handler = async event => {
                             parse_mode,
                         }
 
-                        const res = await sendMessage(response);
-                        console.log("Response generated: ", res.data);
+                        await sendMessage(response);
 
                     } else {
                         response = {
@@ -228,8 +227,7 @@ exports.handler = async event => {
                             parse_mode: parse_mode,
                         }
 
-                        const res = await sendMessage(response);
-                        console.log("Response generated: ", res.data);
+                        await sendMessage(response);
                     }
                     break;
             }
