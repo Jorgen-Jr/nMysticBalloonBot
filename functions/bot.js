@@ -92,7 +92,7 @@ exports.handler = async event => {
     /* Answer message. */
     switch (request) {
         case "/start":
-            console.log('Received /start request;');
+            console.log('Received /start request:', chatId);
 
             await sendMessage({
                 chat_id: chatId,
@@ -186,7 +186,7 @@ exports.handler = async event => {
 
 
     async function sendMessage(response) {
-        return await axios.post('https://nervous-bardeen-125bdd.netlify.app/.netlify/functions/answerInlineQuery', response);
+        return await axios.post('https://nervous-bardeen-125bdd.netlify.app/.netlify/functions/sendMessage', response);
     }
 
     return {
