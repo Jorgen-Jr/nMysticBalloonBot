@@ -1,5 +1,5 @@
 
-const { genSticker } = require("../dist/controllers/genSticker");
+const genSticker = require("../dist/controllers/genSticker");
 
 const axios = require('axios');
 
