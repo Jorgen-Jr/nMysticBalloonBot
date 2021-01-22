@@ -75,7 +75,6 @@ exports.handler = async event => {
 
     const {
         message,
-        inline_query,
     } = req;
 
     console.log('Update received: ', req);
@@ -84,156 +83,110 @@ exports.handler = async event => {
 
     console.log('BOT endpoint: ' + bot_url);
 
-    let response = {};
+    const chatId = message.chat.id;
 
-    let request = "";
+    const request = message.text;
 
-    console.log("Fetching word: " + request);
+    const parse_mode = 'HTML';
 
-    let results = [];
+    /* Answer message. */
+    switch (request) {
+        case "/start":
+            console.log('Received /start request;');
 
-    if (inline_query) {
-        if (results.length === 0) {
-            results.push({
-                type: "Article",
-                id: "404_" + results.length,
-                title: "I currently don't support inline_mode :(",
-                thumb_url:
-                    "https://muwado.com/wp-content/uploads/2014/06/sad-smiley-face.png",
-                description: ":(",
-                input_message_content: {
-                    parse_mode: "HTML",
-                    message_text: ":(",
-                },
+            await sendMessage({
+                chat_id: chatId,
+                text: "Let's get started. use /instructions to receive uh... Intructions",
+                parse_mode,
             });
-        }
 
-        /* Answer said inline query. */
-        response = {
-            inline_query_id: inline_query.id,
-            results,
-        };
+            break;
+        case "/instructions":
+            console.log('Received /instructions request;');
 
-        await answerInlineQuery(response);
+            await sendMessage({
+                chat_id: chatId,
+                text: "Let's get started.",
+                parse_mode,
+            });
 
-    }
+            await sendMessage({
+                chat_id: chatId,
+                text: "You have the following options:",
+                parse_mode,
+            });
 
-    else if (message) {
-        const chatId = message.chat.id;
-        const request = message.text;
+            let instructions = "";
 
-        const parse_mode = 'HTML';
+            balloons.forEach((ballon) => {
+                instructions += `For ${ballon.char_name} with the prefix ${ballon.prefix}  \n`;
+            });
 
-        /* Answer message. */
-        switch (request) {
-            case "/start":
-                response = {
+            instructions += `\nAnd your message should be preffix + message Eg. "JA01 Good morning"`;
+
+            await sendMessage({
+                chat_id: chatId,
+                text: instructions,
+                parse_mode,
+            });
+
+            break;
+        default:
+            console.log('Received request;');
+
+            if (request) {
+
+                await sendMessage({
                     chat_id: chatId,
-                    text: "Let's get started. use /instructions to receive uh... Intructions",
+                    text: "Please wait while we process your request.",
                     parse_mode,
-                }
-
-                await sendMessage(response);
-
-                break;
-            case "/instructions":
-                response = {
-                    chat_id: chatId,
-                    text: "Let's get started.",
-                    parse_mode,
-                }
-
-                await sendMessage(response);
-
-                response = {
-                    chat_id: chatId,
-                    text: "You have the following options:",
-                    parse_mode,
-                }
-
-                await sendMessage(response);
-
-                let instructions = "";
-
-                balloons.forEach((ballon) => {
-                    instructions += `For ${ballon.char_name} with the prefix ${ballon.prefix}  \n`;
                 });
 
-                instructions += `\nAnd your message should be preffix + message Eg. "JA01 Good morning"`;
+                let prefix = request.substring(5);
+                let text = request.substring(0, 4);
 
-                response = {
-                    chat_id: chatId,
-                    text: instructions,
-                    parse_mode,
-                }
+                const result = await genSticker(prefix, text);
 
-                await sendMessage(response);
+                console.log("Resultado da geração", result);
+                if (result !== null) {
 
-                break;
-            default:
-                if (message) {
-                    response = {
+                    await sendMessage({
                         chat_id: chatId,
-                        text: "Please wait while we process your request.",
-                        parse_mode,
-                    }
-
-                    await sendMessage(response);
-
-                    let prefix = message.substring(5);
-                    let text = message.substring(0, 4);
-
-                    const result = await genSticker(prefix, text);
-
-                    console.log("Resultado da geração", result);
-                    if (result !== null) {
-
-                        response = {
-                            chat_id: chatId,
-                            sticker: result,
-                            reply_to_message_id: message.id,
-                            allow_sending_without_reply: true,
-                        }
-
-                    } else {
-                        response = {
-                            chat_id: chatId,
-                            text: "Prefix Invalid",
-                            parse_mode: parse_mode,
-
-                        }
-                    }
-
-                    // send a message in case it doesn't find anything.
-                    response = {
-                        chat_id: chatId,
-                        text: "Sorry, coudn't catch that 😢 \nPlease use only inline commands for now",
-                        parse_mode,
-                    }
-
-                    await sendMessage(response);
+                        sticker: result,
+                        reply_to_message_id: message.message_id,
+                        allow_sending_without_reply: true,
+                    });
 
                 } else {
-                    response = {
+
+                    await sendMessage({
                         chat_id: chatId,
-                        text: "Sorry, coudn't catch that, try reading the instructions",
+                        text: "Prefix Invalid",
                         parse_mode: parse_mode,
-                    }
-
-                    await sendMessage(response);
+                    });
                 }
-                break;
-        }
 
+                // send a message in case it doesn't find anything.
+                await sendMessage({
+                    chat_id: chatId,
+                    text: "Sorry, coudn't catch that 😢 \nPlease use only inline commands for now",
+                    parse_mode,
+                });
 
+            } else {
+                await sendMessage({
+                    chat_id: chatId,
+                    text: "Sorry, coudn't catch that, try reading the instructions",
+                    parse_mode: parse_mode,
+                }
+                );
+            }
+            break;
     }
+
 
     async function sendMessage(response) {
         return await axios.post('https://nervous-bardeen-125bdd.netlify.app/.netlify/functions/answerInlineQuery', response);
-    }
-
-    async function answerInlineQuery(response) {
-        return await axios.post('https://nervous-bardeen-125bdd.netlify.app/.netlify/functions/sendMessage', response);
     }
 
     return {
