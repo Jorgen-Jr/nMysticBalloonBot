@@ -67,6 +67,8 @@ const getRandomWord = require("../dist/util/getRandomWord");
 
 const axios = require('axios');
 
+const { balloons } = require('../dist/data');
+
 exports.handler = async event => {
 
     const body = event.body;
@@ -122,17 +124,14 @@ exports.handler = async event => {
                 results,
             };
 
-            const res = await answerInlineQuery(response);
-
-            console.log("Response generated: ", res.data);
+            await answerInlineQuery(response);
 
         }
+
         else if (message) {
             const chatId = message.chat.id;
 
             /* Answer message. */
-
-
             switch (message) {
                 case "/start":
                     response = {
@@ -235,36 +234,16 @@ exports.handler = async event => {
                     break;
             }
 
-            // send a message to the chat acknowledging receipt of their message
-            const parse_mode = "HTML";
-
-            results.forEach(async (result) => {
-                let response = {
-                    chat_id: chatId,
-                    text: result.input_message_content.message_text,
-                    parse_mode,
-                }
-
-                const res = await sendMessage(response);
-
-                console.log('Response generated: ', res.data)
-            });
-
-
-            response = {
-                chat_id: chatId,
-                results,
-            };
         }
 
     }
 
     async function sendMessage(response) {
-        return await axios.post('https://ndefinition.netlify.app/.netlify/functions/answerInlineQuery', response);
+        return await axios.post('https://nervous-bardeen-125bdd.netlify.app/.netlify/functions/answerInlineQuery', response);
     }
 
     async function answerInlineQuery(response) {
-        return await axios.post('https://ndefinition.netlify.app/.netlify/functions/sendMessage', response);
+        return await axios.post('https://nervous-bardeen-125bdd.netlify.app/.netlify/functions/sendMessage', response);
     }
 
     return {
