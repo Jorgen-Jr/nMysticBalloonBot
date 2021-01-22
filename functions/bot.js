@@ -61,7 +61,7 @@ for inline queries or
 Let's get to it.
 */
 
-const genSticker = require("../dist/controllers/genSticker");
+const genStickerFn = require("../dist/controllers/genSticker");
 
 const axios = require('axios');
 
@@ -175,6 +175,10 @@ exports.handler = async event => {
 
     async function sendMessage(response) {
         return await axios.post('https://nervous-bardeen-125bdd.netlify.app/.netlify/functions/sendMessage', response);
+    }
+
+    async function genSticker(prefix, text) {
+        return await genStickerFn(prefix, text);
     }
 
     return {
