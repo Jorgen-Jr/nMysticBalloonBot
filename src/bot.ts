@@ -65,10 +65,13 @@ if (token) {
 
     switch (message) {
       case "/start":
-        bot?.sendMessage(chatId, "Let's get started.");
+        bot?.sendMessage(
+          chatId,
+          "Let's get started.\n Use /intructions to receive uh... Instructions..?"
+        );
         break;
       case "/instructions":
-        bot?.sendMessage(chatId, "Let's get started.");
+        bot?.sendMessage(chatId, "Allright.");
         bot?.sendMessage(chatId, "You have the following options:");
 
         let instructions = "";

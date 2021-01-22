@@ -11,7 +11,9 @@
     "serve": "node dist/server.js",
     "watch": "tsc -w",
     "dev": "nodemon src/server.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deployhomolog": "cp /home/jorge-n/Documentos/workspace/nMysticMessengerBot/src/ /home/jorge-n/Documentos/workspace/nMysticMessengerBot/*.json /home/jorge-n/Documentos/Projetos/TelegramBots/MysticMessengerBot -r",
+    "postdeployhomolog": "sudo docker container restart mystic_messenger_bot"
   },
   "author": "Jorge Antônio da Silva Nascimento Junior",
   "license": "ISC",
