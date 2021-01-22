@@ -61,9 +61,7 @@ for inline queries or
 Let's get to it.
 */
 
-const ThesaurusController = require("../dist/controllers/ThesaurusController");
-const PriberamController = require("../dist/controllers/PriberamController");
-const UrbanDictionaryController = require("../dist/controllers/UrbanDictionaryController");
+const genSticker = require("../dist/controllers/genSticker");
 
 const getRandomWord = require("../dist/util/getRandomWord");
 
@@ -88,35 +86,26 @@ exports.handler = async event => {
 
     let response = {};
 
-    let word = "";
+    let request = "";
 
     if (inline_query) {
-        word = inline_query.query || (await getRandomWord.default());
+        request = inline_query.query || (await getRandomWord.default());
     } else if (message) {
-        word = message.text;
+        request = message.text;
     }
 
 
-    if (word) {
-        console.log("Fetching word: " + word);
+    if (request) {
+        console.log("Fetching word: " + request);
 
         let results = [];
-
-        //Catch the word from TheSaurus
-        results.push(...(await ThesaurusController.default(word)));
-
-        //Fetch results from Priberam
-        results.push(...(await PriberamController.default(word)));
-
-        //Catch the word from Urban Dictionary
-        results.push(...(await UrbanDictionaryController.default(word)));
 
         if (inline_query) {
             if (results.length === 0) {
                 results.push({
                     type: "Article",
                     id: "404_" + results.length,
-                    title: "Not Found",
+                    title: "I currently don't support inline_mode :(",
                     thumb_url:
                         "https://muwado.com/wp-content/uploads/2014/06/sad-smiley-face.png",
                     description: ":(",
@@ -143,21 +132,111 @@ exports.handler = async event => {
 
             /* Answer message. */
 
-            // send a message to the chat acknowledging receipt of their message
-            const parse_mode = "HTML";
 
-            if (results.length === 0) {
-                // send a message in case it doesn't find anything.
-                response = {
-                    chat_id: chatId,
-                    text: "Sorry, coudn't catch that 😢 \nPlease use only inline commands for now",
-                    parse_mode,
-                }
+            switch (message) {
+                case "/start":
+                    response = {
+                        chat_id: chatId,
+                        text: "Let's get started. use /instructions to receive uh... Intructions",
+                        parse_mode,
+                    }
 
-                const res = await sendMessage(response);
-                console.log("Response generated: ", res.data);
+                    await sendMessage(response);
+
+                    break;
+                case "/instructions":
+                    response = {
+                        chat_id: chatId,
+                        text: "Let's get started.",
+                        parse_mode,
+                    }
+
+                    await sendMessage(response);
+
+                    response = {
+                        chat_id: chatId,
+                        text: "You have the following options:",
+                        parse_mode,
+                    }
+
+                    await sendMessage(response);
+
+                    let instructions = "";
+
+                    balloons.forEach((ballon) => {
+                        instructions += `For ${ballon.char_name} with the prefix ${ballon.prefix}  \n`;
+                    });
+
+                    instructions += `\nAnd your message should be preffix + message Eg. "JA01 Good morning"`;
+
+                    response = {
+                        chat_id: chatId,
+                        text: instructions,
+                        parse_mode,
+                    }
+
+                    await sendMessage(response);
+
+                    break;
+                default:
+                    if (message) {
+                        response = {
+                            chat_id: chatId,
+                            text: "Please wait while we process your request.",
+                            parse_mode,
+                        }
+
+                        const res = await sendMessage(response);
+
+                        let prefix = message.substring(5);
+                        let text = message.substring(0, 4);
+
+                        const result = await genSticker(prefix, text);
+
+                        console.log("Resultado da geração", result);
+                        if (result !== null) {
+
+                            response = {
+                                chat_id: chatId,
+                                sticker: result,
+                                reply_to_message_id: message.id,
+                                allow_sending_without_reply: true,
+                            }
+
+                        } else {
+                            response = {
+                                chat_id: chatId,
+                                text: "Prefix Invalid",
+                                parse_mode: parse_mode,
+
+                            }
+                        }
+
+                        // send a message in case it doesn't find anything.
+                        response = {
+                            chat_id: chatId,
+                            text: "Sorry, coudn't catch that 😢 \nPlease use only inline commands for now",
+                            parse_mode,
+                        }
+
+                        const res = await sendMessage(response);
+                        console.log("Response generated: ", res.data);
+
+                    } else {
+                        response = {
+                            chat_id: chatId,
+                            text: "Sorry, coudn't catch that, try reading the instructions",
+                            parse_mode: parse_mode,
+                        }
+
+                        const res = await sendMessage(response);
+                        console.log("Response generated: ", res.data);
+                    }
+                    break;
             }
 
+            // send a message to the chat acknowledging receipt of their message
+            const parse_mode = "HTML";
 
             results.forEach(async (result) => {
                 let response = {
