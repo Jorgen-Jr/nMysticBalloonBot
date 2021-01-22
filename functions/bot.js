@@ -1,67 +1,5 @@
-/* 
-The update object telegram is expected to send is
-{
-    update_id,
-    message,
-    edited_message,
-    channel_post,
-    edited_channel_post,
-    inline_query?: {
-        id,
-        from,
-        location,
-        query,
-        offset,
-    },
-    chosen_inline_result,
-    callback_query,
-    shipping_query,
-    pre_checkout_query,
-    poll,
-    poll_answer,
-}
-from the body of it's request.
 
-the answer it is expecting is
-{
-    inline_query_id,
-    results: [
-        {
-            type,
-            id,
-            title,
-            input_message_content,
-            reply_markup,
-            url,
-            hide_url,
-            description,
-            thumb_url,
-            thumb_width,
-            thumb_height,
-        }  
-    ]
-    cache_time,
-    is_personal?,
-    next_offset?,
-    switch_pm_text?,
-    switch_pm_parameter?,
-}
-for inline queries or
-{
-    chat_id,
-    text,
-    parse_mode,
-    entities,
-    disable_web_page_preview,
-    disable_notification,
-    reply_to_message_id,
-    allow_sending_without_reply,
-    reply_markup,
-}
-Let's get to it.
-*/
-
-const genStickerFn = require("../dist/controllers/genSticker");
+const genSticker = require("../dist/controllers/genSticker");
 
 const axios = require('axios');
 
@@ -133,6 +71,8 @@ exports.handler = async event => {
                 let prefix = request.substring(5);
                 let text = request.substring(0, 4);
 
+                console.log(genSticker);
+
                 const result = await genSticker(prefix, text);
 
                 console.log("Resultado da geração", result);
@@ -175,10 +115,6 @@ exports.handler = async event => {
 
     async function sendMessage(response) {
         return await axios.post('https://nervous-bardeen-125bdd.netlify.app/.netlify/functions/sendMessage', response);
-    }
-
-    async function genSticker(prefix, text) {
-        return await genStickerFn(prefix, text);
     }
 
     return {
