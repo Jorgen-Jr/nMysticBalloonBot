@@ -8,7 +8,10 @@ const PImage = require("pureimage");
 const fs = require("fs");
 const webp = require("webp-converter");
 
-export default async (message: string, prefix: string): Promise<any | null> => {
+export const genSticker = async (
+  message: string,
+  prefix: string
+): Promise<any | null> => {
   console.log(prefix, message);
 
   webp.grant_permission();
@@ -112,3 +115,7 @@ export default async (message: string, prefix: string): Promise<any | null> => {
     return null;
   }
 };
+
+export default genSticker;
+
+module.exports = genSticker;
