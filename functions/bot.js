@@ -104,19 +104,7 @@ exports.handler = async event => {
         case "/instructions":
             console.log('Received /instructions request;');
 
-            await sendMessage({
-                chat_id: chatId,
-                text: "Let's get started.",
-                parse_mode,
-            });
-
-            await sendMessage({
-                chat_id: chatId,
-                text: "You have the following options:",
-                parse_mode,
-            });
-
-            let instructions = "";
+            let instructions = "Let's get started \n\n\n You have the following options:\n";
 
             balloons.forEach((ballon) => {
                 instructions += `For ${ballon.char_name} with the prefix ${ballon.prefix}  \n`;
