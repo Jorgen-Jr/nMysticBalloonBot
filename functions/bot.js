@@ -122,6 +122,8 @@ exports.handler = async event => {
         const chatId = message.chat.id;
         const request = message.text;
 
+        const parse_mode = 'HTML';
+
         /* Answer message. */
         switch (request) {
             case "/start":
