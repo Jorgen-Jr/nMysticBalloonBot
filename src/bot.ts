@@ -67,7 +67,7 @@ if (token) {
       case "/start":
         bot?.sendMessage(
           chatId,
-          "Let's get started.\n Use /intructions to receive uh... Instructions..?"
+          "Let's get started.\n Use /instructions to receive uh... Instructions..?"
         );
         break;
       case "/instructions":
