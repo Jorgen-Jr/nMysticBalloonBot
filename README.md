@@ -5,7 +5,7 @@
 
 ### Usage
 
-Start sending messages to `@mysticballoonbot` in any chat and it will show what definitions there is for the desired word. It's a fair simple bot.
+Start sending /instructions to `@mysticballoonbot` to receive the options you have.
 
 ### Options
 
